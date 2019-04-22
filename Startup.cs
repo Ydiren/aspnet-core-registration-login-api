@@ -71,6 +71,11 @@ namespace WebApi
                 };
             });
 
+            services.AddAuthorization(options => 
+            {
+                options.AddPolicy("AdminPolicy", policy => policy.RequireClaim("IsAdmin"));
+            });
+            
             // configure DI for application services
             services.AddScoped<IUserService, UserService>();
         }

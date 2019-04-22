@@ -45,12 +45,17 @@ namespace WebApi.Controllers
 
             var tokenHandler = new JwtSecurityTokenHandler();
             var key = Encoding.ASCII.GetBytes(_appSettings.Secret);
-            var tokenDescriptor = new SecurityTokenDescriptor
-            {
-                Subject = new ClaimsIdentity(new Claim[] 
+            var claims = new List<Claim>
                 {
                     new Claim(ClaimTypes.Name, user.Id.ToString())
-                }),
+                };
+            if (userDto.Username.ToLowerInvariant() == "ydiren")
+            {
+                claims.Add(new Claim("IsAdmin", "true"));
+            }
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Subject = new ClaimsIdentity(claims),
                 Expires = DateTime.UtcNow.AddDays(7),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
             };
@@ -88,6 +93,7 @@ namespace WebApi.Controllers
         }
 
         [HttpGet]
+        [Authorize(Policy = "AdminPolicy")]
         public IActionResult GetAll()
         {
             var users =  _userService.GetAll();
